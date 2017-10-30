@@ -1,0 +1,10 @@
+[package]
+name = "chat"
+version = "0.1.0"
+authors = ["Laura White-Avian <whiteavian@users.noreply.github.com>"]
+
+[dependencies]
+futures = "0.1"
+tokio-core = "0.1"
+tokio-io = "0.1"
+mio = { git = "https://github.com/carllerche/mio" }
