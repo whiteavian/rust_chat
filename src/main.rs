@@ -66,12 +66,13 @@ fn extract_prefix(message: &str) -> (String, &str) {
     let mut rest = "";
 
     if message.starts_with(':') {
-        let mut message_split:Vec<&str> = message.splitn(3, " ").collect();
+        let mut message_split:Vec<&str> = message.splitn(2, " ").collect();
 
 //        Remove the colon from the prefix.
         prefix = message_split[0].chars().skip(1).take(message_split[0].len() - 1).collect();
-        if message_split.len() == 3 {
-            rest = message_split[2];
+
+        if message_split.len() == 2 {
+            rest = message_split[1];
         } else {
 //            assert error here instead, because there should always be a space and therefore a message?
         }
@@ -90,18 +91,18 @@ mod test {
     #[test]
     fn test_extract_prefix() {
         let mut message = ":borja!borja@polaris.cs.uchicago.edu PRIVMSG #cmsc23300 :Hello everybody";
-        let prefix = extract_prefix(message);
-        assert!(eq(message, "PRIVMSG #cmsc23300 :Hello everybody"));
-        assert!(eq(prefix, "borja!borja@polaris.cs.uchicago.edu"));
+        let (prefix, rest) = extract_prefix(message);
+        assert_eq!(rest, "PRIVMSG #cmsc23300 :Hello everybody");
+        assert_eq!(prefix, "borja!borja@polaris.cs.uchicago.edu");
 
         let mut message2 = "QUIT :Done for the day, leaving";
-        let prefix2 = extract_prefix(message2);
-        assert!(eq(message2, "QUIT :Done for the day, leaving"));
-        assert!(eq(prefix2, ""));
+        let (prefix2, rest2) = extract_prefix(message2);
+        assert_eq!(rest2, "QUIT :Done for the day, leaving");
+        assert_eq!(prefix2, "");
 
         let mut message3 = "WHOIS doctor";
-        let prefix3 = extract_prefix(message3);
-        assert!(eq(message3, "WHOIS doctor"));
-        assert!(eq(prefix3, ""));
+        let (prefix3, rest3) = extract_prefix(message3);
+        assert_eq!(rest3, "WHOIS doctor");
+        assert_eq!(prefix3, "");
     }
 }
