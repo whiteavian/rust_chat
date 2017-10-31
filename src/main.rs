@@ -68,14 +68,10 @@ fn extract_prefix(message: &str) -> (String, &str) {
     if message.starts_with(':') {
         let mut message_split:Vec<&str> = message.splitn(2, " ").collect();
 
-//        Remove the colon from the prefix.
+        // Remove the colon from the prefix.
         prefix = message_split[0].chars().skip(1).take(message_split[0].len() - 1).collect();
-
-        if message_split.len() == 2 {
-            rest = message_split[1];
-        } else {
-//            assert error here instead, because there should always be a space and therefore a message?
-        }
+        // Assert error in case message_split isn't long enough?
+        rest = message_split[1];
     } else {
         rest = message;
         prefix = String::new();
