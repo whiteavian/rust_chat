@@ -1,38 +1,8 @@
-//extern crate futures;
-//extern crate tokio_core;
-//extern crate tokio_io;
-//
-//use futures::{Future, Stream};
-//use tokio_core::net::TcpListener;
-//use tokio_core::reactor::Core;
-//use tokio_io::io::{read_to_end, write_all};
-//use tokio_io::AsyncRead;
-//
-//
-//// This is more or less identical to the example provided by:
-//// https://tokio-rs.github.io/tokio-core/tokio_core/index.html
-//fn main() {
-//
-//    let mut core = Core::new().unwrap();
-//    let handle = core.handle();
-//    let address = "127.0.0.1:8001".parse().unwrap();
-//    let server_socket = TcpListener::bind(&address, &handle).unwrap();
-//
-//    let server = server_socket.incoming().for_each(|(sock, _)| {
-////        let (reader, writer) = sock.split();
-////        let result = sock.read_to_string();
-//
-//        Ok(())
-//    });
-//
-//    core.run(server).unwrap();
-//}
-
-
 // Simpler example:
 // https://medium.com/adventures-in-rust/moving-to-tcpstream-bye-tokio-5a1488f337f6
+use std::collections::HashMap;
 use std::net::{TcpStream, TcpListener};
-use std::io::Write;
+use std::io::{Read, Write};
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:8001").unwrap();
@@ -40,8 +10,10 @@ fn main() {
     for stream in listener.incoming() {
         match stream {
             Ok(mut stream) => {
-                let response = b"Hello World!\n";
-                stream.write(response).expect("Response failed.");
+                let mut buffer = String::new();
+                stream.read_to_string(&mut buffer);
+                parse_message(&buffer);
+                stream.write(buffer.as_bytes()).expect("Response failed.");
             }
             Err(e) => {
                 println!("Unable to connect: {}.", e);
@@ -49,3 +21,37 @@ fn main() {
         }
     }
 }
+
+fn parse_message(message: &str) -> HashMap<String, String> {
+    println!("MESSAGE {:?}", message);
+    let mut split = message.split(":");
+    //    TODO I do not completely understand this syntax.
+    let mut vec = split.collect::<Vec<&str>>();
+    let vec_len = vec.len();
+
+    let rest;
+    let usr_msg = "";
+    let prefix;
+
+    // TODO make prefix an option?
+    if vec[0] == "" {
+        let prefix_rest_split = vec[1].split(" ");
+        let mut prefix_rest_vec = prefix_rest_split.collect::<Vec<&str>>();
+
+        prefix = prefix_rest_vec[0];
+        rest = prefix_rest_vec.split_at(1).1;
+    } else {
+        prefix = "";
+        rest = vec;
+    }
+    println!("rest {:?}", rest);
+    println!("prefix {:?}", prefix);
+    println!("usr_msg {:?}", usr_msg);
+    //    if vec.len() == 2 {
+    //    } else if vec.len() == 3 {
+    //
+    //    }
+    HashMap::new()
+}
+
+
