@@ -28,17 +28,25 @@ fn main() {
 
 /// Separate a message into components.
 fn parse_message(message: &str) -> HashMap<String, String> {
-    println!("MESSAGE {:?}", message);
-    let mut split = message.split(":");
-    //    TODO I do not completely understand this syntax.
-    let mut vec = split.collect::<Vec<&str>>();
+    let split = message.split(":");
+    // TODO I do not completely understand this syntax.
+    let vec = split.collect::<Vec<&str>>();
     let vec_len = vec.len();
 
-    let usr_msg = "";
-
-    let (prefix, rest) = separate_prefix(message);
+    let (prefix, mut rest) = separate_prefix(message);
+    let (rest, usr_msg) = separate_usr_msg(rest);
 
     HashMap::new()
+}
+
+fn separate_usr_msg(rest: &str) -> (&str, &str) {
+    let colon_loc = rest.find(" :");
+    println!("COLON LOC {:?}", colon_loc);
+    match colon_loc {
+        Some(usize) =>
+            rest.split_at(colon_loc.unwrap() + 2),
+        None => (rest, ""),
+    }
 }
 
 /// Separate the prefix from the rest of the message and return both separately.
@@ -81,5 +89,23 @@ mod test {
         let (prefix3, rest3) = separate_prefix(message3);
         assert_eq!(rest3, "WHOIS doctor");
         assert_eq!(prefix3, "");
+    }
+
+    #[test]
+    fn test_separate_user_msg() {
+        let message = "PRIVMSG #cmsc23300 :Hello everybody";
+        let (rest, usr_msg) = separate_prefix(message);
+        println!("REST {:?}", rest);
+        println!("Usr msg {:?}", usr_msg);
+        assert_eq!(rest, "PRIVMSG #cmsc23300");
+        assert_eq!(usr_msg, "Hello everybody");
+
+        let message2 = "WHOIS doctor";
+        let (rest2, usr_msg2) = separate_prefix(message2);
+        println!("REST {:?}", rest2);
+        println!("Usr msg {:?}", usr_msg2);
+        assert_eq!(rest2, "WHOIS doctor");
+        assert_eq!(usr_msg2, "");
+
     }
 }
