@@ -61,29 +61,31 @@ fn parse_message(message: &str) -> HashMap<String, String> {
 }
 
 /// Extract the prefix from the message and return the prefix or an empty string.
-fn extract_prefix(message: &str) -> &str {
-    let prefix: &str;
+fn extract_prefix(message: &str) -> (String, &str) {
+    let prefix:String;
+    let mut rest = "";
 
     if message.starts_with(':') {
-        let message_split:Vec<&str> = message.splitn(3, " ").collect();
+        let mut message_split:Vec<&str> = message.splitn(3, " ").collect();
 
-        prefix = message_split[0];
+//        Remove the colon from the prefix.
+        prefix = message_split[0].chars().skip(1).take(message_split[0].len() - 1).collect();
         if message_split.len() == 3 {
+            rest = message_split[2];
         } else {
-            let foo: &str;
 //            assert error here instead, because there should always be a space and therefore a message?
         }
     } else {
-        prefix = "";
+        rest = message;
+        prefix = String::new();
     }
 
-    prefix
+    (prefix, rest)
 }
 
 #[cfg(test)]
 mod test {
     use extract_prefix;
-    use std::ptr::eq;
 
     #[test]
     fn test_extract_prefix() {
