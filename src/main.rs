@@ -36,6 +36,7 @@ fn parse_message(message: &str) -> HashMap<String, String> {
 
     let usr_msg = "";
 
+    let (prefix, rest) = separate_prefix(message);
 
     HashMap::new()
 }
@@ -43,10 +44,10 @@ fn parse_message(message: &str) -> HashMap<String, String> {
 /// Separate the prefix from the rest of the message and return both separately.
 fn separate_prefix(message: &str) -> (String, &str) {
     let prefix:String;
-    let mut rest = "";
+    let rest;
 
     if message.starts_with(':') {
-        let mut message_split:Vec<&str> = message.splitn(2, " ").collect();
+        let message_split:Vec<&str> = message.splitn(2, " ").collect();
 
         // Remove the colon from the prefix.
         prefix = message_split[0].chars().skip(1).take(message_split[0].len() - 1).collect();
@@ -66,17 +67,17 @@ mod test {
 
     #[test]
     fn test_separate_prefix() {
-        let mut message = ":borja!borja@polaris.cs.uchicago.edu PRIVMSG #cmsc23300 :Hello everybody";
+        let message = ":borja!borja@polaris.cs.uchicago.edu PRIVMSG #cmsc23300 :Hello everybody";
         let (prefix, rest) = separate_prefix(message);
         assert_eq!(rest, "PRIVMSG #cmsc23300 :Hello everybody");
         assert_eq!(prefix, "borja!borja@polaris.cs.uchicago.edu");
 
-        let mut message2 = "QUIT :Done for the day, leaving";
+        let message2 = "QUIT :Done for the day, leaving";
         let (prefix2, rest2) = separate_prefix(message2);
         assert_eq!(rest2, "QUIT :Done for the day, leaving");
         assert_eq!(prefix2, "");
 
-        let mut message3 = "WHOIS doctor";
+        let message3 = "WHOIS doctor";
         let (prefix3, rest3) = separate_prefix(message3);
         assert_eq!(rest3, "WHOIS doctor");
         assert_eq!(prefix3, "");
