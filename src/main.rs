@@ -34,23 +34,24 @@ fn parse_message(message: &str) -> HashMap<String, String> {
     let mut vec = split.collect::<Vec<&str>>();
     let vec_len = vec.len();
 
-    let rest;
+    let rest: Vec<&str>;
     let usr_msg = "";
     let prefix;
 
     // TODO make prefix an option?
     if vec[0] == "" {
-        let prefix_rest_split = vec[1].split(" ");
-        let mut prefix_rest_vec = prefix_rest_split.collect::<Vec<&str>>();
-
-        prefix = prefix_rest_vec[0];
-        rest = prefix_rest_vec.split_at(1).1;
+        let foo: &str;
+//        let prefix_rest_split = vec[1].split(" ");
+//        let mut prefix_rest_vec = prefix_rest_split.collect::<Vec<&str>>();
+//
+//        prefix = prefix_rest_vec[0];
+//        rest = prefix_rest_vec.split_at(1).1;
+//        println!("rest {:?}", rest);
     } else {
         prefix = "";
-        rest = vec;
+//        rest = vec;
     }
-    println!("rest {:?}", rest);
-    println!("prefix {:?}", prefix);
+//    println!("prefix {:?}", prefix);
     println!("usr_msg {:?}", usr_msg);
     //    if vec.len() == 2 {
     //    } else if vec.len() == 3 {
@@ -60,19 +61,45 @@ fn parse_message(message: &str) -> HashMap<String, String> {
 }
 
 /// Extract the prefix from the message and return the prefix or an empty string.
-fn extract_prefix(message: &mut str) -> String {
-    let prefix: String;
+fn extract_prefix(message: &str) -> &str {
+    let prefix: &str;
 
     if message.starts_with(':') {
-        let message_split = message.splitn(2, " ").collect();
+        let message_split:Vec<&str> = message.splitn(3, " ").collect();
 
         prefix = message_split[0];
-        if message_split.len() == 2 {
-            message = message_split[1];
+        if message_split.len() == 3 {
         } else {
-            message = "";
+            let foo: &str;
+//            assert error here instead, because there should always be a space and therefore a message?
         }
+    } else {
+        prefix = "";
     }
 
     prefix
+}
+
+#[cfg(test)]
+mod test {
+    use extract_prefix;
+    use std::ptr::eq;
+
+    #[test]
+    fn test_extract_prefix() {
+        let mut message = ":borja!borja@polaris.cs.uchicago.edu PRIVMSG #cmsc23300 :Hello everybody";
+        let prefix = extract_prefix(message);
+        assert!(eq(message, "PRIVMSG #cmsc23300 :Hello everybody"));
+        assert!(eq(prefix, "borja!borja@polaris.cs.uchicago.edu"));
+
+        let mut message2 = "QUIT :Done for the day, leaving";
+        let prefix2 = extract_prefix(message2);
+        assert!(eq(message2, "QUIT :Done for the day, leaving"));
+        assert!(eq(prefix2, ""));
+
+        let mut message3 = "WHOIS doctor";
+        let prefix3 = extract_prefix(message3);
+        assert!(eq(message3, "WHOIS doctor"));
+        assert!(eq(prefix3, ""));
+    }
 }
