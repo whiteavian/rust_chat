@@ -34,34 +34,14 @@ fn parse_message(message: &str) -> HashMap<String, String> {
     let mut vec = split.collect::<Vec<&str>>();
     let vec_len = vec.len();
 
-    let rest: Vec<&str>;
     let usr_msg = "";
-    let prefix;
 
-    // TODO make prefix an option?
-    if vec[0] == "" {
-        let foo: &str;
-//        let prefix_rest_split = vec[1].split(" ");
-//        let mut prefix_rest_vec = prefix_rest_split.collect::<Vec<&str>>();
-//
-//        prefix = prefix_rest_vec[0];
-//        rest = prefix_rest_vec.split_at(1).1;
-//        println!("rest {:?}", rest);
-    } else {
-        prefix = "";
-//        rest = vec;
-    }
-//    println!("prefix {:?}", prefix);
-    println!("usr_msg {:?}", usr_msg);
-    //    if vec.len() == 2 {
-    //    } else if vec.len() == 3 {
-    //
-    //    }
+
     HashMap::new()
 }
 
-/// Extract the prefix from the message and return the prefix or an empty string.
-fn extract_prefix(message: &str) -> (String, &str) {
+/// Separate the prefix from the rest of the message and return both separately.
+fn separate_prefix(message: &str) -> (String, &str) {
     let prefix:String;
     let mut rest = "";
 
@@ -82,22 +62,22 @@ fn extract_prefix(message: &str) -> (String, &str) {
 
 #[cfg(test)]
 mod test {
-    use extract_prefix;
+    use separate_prefix;
 
     #[test]
-    fn test_extract_prefix() {
+    fn test_separate_prefix() {
         let mut message = ":borja!borja@polaris.cs.uchicago.edu PRIVMSG #cmsc23300 :Hello everybody";
-        let (prefix, rest) = extract_prefix(message);
+        let (prefix, rest) = separate_prefix(message);
         assert_eq!(rest, "PRIVMSG #cmsc23300 :Hello everybody");
         assert_eq!(prefix, "borja!borja@polaris.cs.uchicago.edu");
 
         let mut message2 = "QUIT :Done for the day, leaving";
-        let (prefix2, rest2) = extract_prefix(message2);
+        let (prefix2, rest2) = separate_prefix(message2);
         assert_eq!(rest2, "QUIT :Done for the day, leaving");
         assert_eq!(prefix2, "");
 
         let mut message3 = "WHOIS doctor";
-        let (prefix3, rest3) = extract_prefix(message3);
+        let (prefix3, rest3) = separate_prefix(message3);
         assert_eq!(rest3, "WHOIS doctor");
         assert_eq!(prefix3, "");
     }
