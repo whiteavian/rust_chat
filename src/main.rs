@@ -10,10 +10,14 @@ fn main() {
     for stream in listener.incoming() {
         match stream {
             Ok(mut stream) => {
-                let mut buffer = String::new();
-                stream.read_to_string(&mut buffer);
-                parse_message(&buffer);
-                stream.write(buffer.as_bytes()).expect("Response failed.");
+                let mut message = String::new();
+//  wait to parse_message until we have either reached 510 chars or \r\n
+//  create a new message after that has occurred. How do we account for >510 chars?
+//  Determine separate message by what must occur at the beginning of a message. Discard anything after
+//  the 510 char limit and before the proper beginning of a message.
+                stream.read_to_string(&mut message);
+                parse_message(&message);
+                stream.write(message.as_bytes()).expect("Response failed.");
             }
             Err(e) => {
                 println!("Unable to connect: {}.", e);
@@ -22,6 +26,7 @@ fn main() {
     }
 }
 
+/// Separate a message into components.
 fn parse_message(message: &str) -> HashMap<String, String> {
     println!("MESSAGE {:?}", message);
     let mut split = message.split(":");
@@ -54,4 +59,20 @@ fn parse_message(message: &str) -> HashMap<String, String> {
     HashMap::new()
 }
 
+/// Extract the prefix from the message and return the prefix or an empty string.
+fn extract_prefix(message: &mut str) -> String {
+    let prefix: String;
 
+    if message.starts_with(':') {
+        let message_split = message.splitn(2, " ").collect();
+
+        prefix = message_split[0];
+        if message_split.len() == 2 {
+            message = message_split[1];
+        } else {
+            message = "";
+        }
+    }
+
+    prefix
+}
