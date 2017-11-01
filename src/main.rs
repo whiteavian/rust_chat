@@ -33,12 +33,15 @@ fn parse_message(message: &str) -> HashMap<String, String> {
     let vec = split.collect::<Vec<&str>>();
     let vec_len = vec.len();
 
-    let (prefix, mut rest) = separate_prefix(message);
+//    is it bad form to take over the name of a variable as I've done here?
+    let (prefix, rest) = separate_prefix(message);
     let (rest, usr_msg) = separate_usr_msg(rest);
 
     HashMap::new()
 }
 
+/// Return the given str as a tuple separated by space colon. This is to be used for separating the
+/// user's portion of a message from an IRC message that has already had the prefix removed.
 fn separate_usr_msg(rest: &str) -> (&str, &str) {
     let colon_loc = rest.find(" :");
     match colon_loc {
