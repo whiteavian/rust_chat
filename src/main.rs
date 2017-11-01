@@ -41,10 +41,12 @@ fn parse_message(message: &str) -> HashMap<String, String> {
 
 fn separate_usr_msg(rest: &str) -> (&str, &str) {
     let colon_loc = rest.find(" :");
-    println!("COLON LOC {:?}", colon_loc);
     match colon_loc {
-        Some(usize) =>
-            rest.split_at(colon_loc.unwrap() + 2),
+        Some(usize) => {
+            let colon_loc_u = colon_loc.unwrap();
+            let (rest, usr_msg) = rest.split_at(colon_loc_u + 2);
+            (&rest[0..colon_loc_u], usr_msg)
+        },
         None => (rest, ""),
     }
 }
@@ -72,6 +74,7 @@ fn separate_prefix(message: &str) -> (String, &str) {
 #[cfg(test)]
 mod test {
     use separate_prefix;
+    use separate_usr_msg;
 
     #[test]
     fn test_separate_prefix() {
@@ -94,14 +97,14 @@ mod test {
     #[test]
     fn test_separate_user_msg() {
         let message = "PRIVMSG #cmsc23300 :Hello everybody";
-        let (rest, usr_msg) = separate_prefix(message);
+        let (rest, usr_msg) = separate_usr_msg(message);
         println!("REST {:?}", rest);
         println!("Usr msg {:?}", usr_msg);
         assert_eq!(rest, "PRIVMSG #cmsc23300");
         assert_eq!(usr_msg, "Hello everybody");
 
         let message2 = "WHOIS doctor";
-        let (rest2, usr_msg2) = separate_prefix(message2);
+        let (rest2, usr_msg2) = separate_usr_msg(message2);
         println!("REST {:?}", rest2);
         println!("Usr msg {:?}", usr_msg2);
         assert_eq!(rest2, "WHOIS doctor");
