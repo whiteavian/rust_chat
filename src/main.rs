@@ -1,35 +1,47 @@
-// Simpler example:
-// https://medium.com/adventures-in-rust/moving-to-tcpstream-bye-tokio-5a1488f337f6
+extern crate futures;
+extern crate tokio_core;
+extern crate tokio_io;
+
+use std::io::Read;
 use std::collections::HashMap;
-use std::net::{TcpStream, TcpListener};
-use std::io::{Read, Write};
+use futures::stream::Stream;
+use tokio_core::reactor::Core;
+use tokio_core::net::TcpListener;
+
+const LISTEN_TO: &'static str ="127.0.0.1:8001";
 
 fn main() {
-    let listener = TcpListener::bind("127.0.0.1:8001").unwrap();
+    let socket = LISTEN_TO.parse().unwrap();
 
-    for stream in listener.incoming() {
-        match stream {
-            Ok(mut stream) => {
-                let mut message = String::new();
-//  wait to parse_message until we have either reached 510 chars or \r\n
-//  create a new message after that has occurred. How do we account for >510 chars?
-//  Determine separate message by what must occur at the beginning of a message. Discard anything after
-//  the 510 char limit and before the proper beginning of a message.
-                stream.read_to_string(&mut message);
-                parse_message(&message);
-                stream.write(message.as_bytes()).expect("Response failed.");
-            }
-            Err(e) => {
-                println!("Unable to connect: {}.", e);
-            }
-        }
-    }
+    let mut core = Core::new().unwrap();
+    let handle = core.handle();
+
+    let listener = TcpListener::bind(&socket, &handle).unwrap();
+
+    //  wait to parse_message until we have either reached 510 chars or \r\n
+    //  create a new message after that has occurred. How do we account for >510 chars?
+    //  Determine separate message by what must occur at the beginning of a message. Discard anything after
+    //  the 510 char limit and before the proper beginning of a message.
+    let mut message = String::new();
+
+    let connections = listener.incoming();
+    let welcomes = connections.and_then(|(mut socket, _peer_addr)| {
+            socket.read_to_string(&mut message);
+            println!("SOCKET {:?}", message);
+            tokio_io::io::write_all(socket, b"Hello world\n")
+        });
+
+    let server = welcomes.for_each(|(_socket, _welcome)| {
+        Ok(())
+    });
+
+    core.run(server).unwrap();
+
 }
 
 /// Separate a message into components.
 fn parse_message(message: &str) -> HashMap<String, String> {
     let split = message.split(":");
-    // TODO I do not completely understand this syntax.
     let vec = split.collect::<Vec<&str>>();
     let vec_len = vec.len();
 
