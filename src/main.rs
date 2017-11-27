@@ -4,9 +4,11 @@ extern crate tokio_io;
 
 use std::io::Read;
 use std::collections::HashMap;
+
 use futures::stream::Stream;
 use tokio_core::reactor::Core;
 use tokio_core::net::TcpListener;
+use tokio_io::AsyncRead;
 
 const LISTEN_TO: &'static str ="127.0.0.1:8001";
 
@@ -17,6 +19,7 @@ fn main() {
     let handle = core.handle();
 
     let listener = TcpListener::bind(&socket, &handle).unwrap();
+    println!("Listening on socket {}", socket);
 
     //  wait to parse_message until we have either reached 510 chars or \r\n
     //  create a new message after that has occurred. How do we account for >510 chars?
@@ -24,16 +27,15 @@ fn main() {
     //  the 510 char limit and before the proper beginning of a message.
     let mut message = String::new();
 
-    let connections = listener.incoming();
-    let welcomes = connections.and_then(|(mut socket, _peer_addr)| {
-            socket.read_to_string(&mut message);
-            println!("SOCKET {:?}", message);
-            tokio_io::io::write_all(socket, b"Hello world\n")
-        });
-
-    let server = welcomes.for_each(|(_socket, _welcome)| {
-        Ok(())
+    let connections = listener.incoming().and_then(|(mut socket, addr)| {
+        println!("New Connection: {}", addr);
+        socket.read_to_string(&mut message);
+        println!("SOCKET {:?}", message);
+        tokio_io::io::write_all(socket, b"Hello!\n")
     });
+    let server = connections.for_each( move |(mut socket, welcome)| {
+        Ok(())
+        });
 
     core.run(server).unwrap();
 
